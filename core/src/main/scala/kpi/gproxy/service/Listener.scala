@@ -1,6 +1,7 @@
 package kpi.gproxy.service
 
 import akka.actor.{ Actor, ActorLogging }
+import akka.util.ByteString
 import java.net.InetSocketAddress
 import scala.util.Try
 
@@ -13,17 +14,24 @@ class LineReceiver (out: ActorRef) extends Actor with ActorLogging {
   import Tcp._
 
   def receive = {
-    case Received(data) => parseLine(data.utf8String)
+    case Received(data) => {
+      val resp = parseLine(data.utf8String)
+      log.debug(s"Send string: $resp")
+      sender() ! Write(ByteString(resp))
+    }
+
     case PeerClosed => context stop self
     case ErrorClosed(cause) => context stop self
   }
 
-  def parseLine(line:String) = Try(Json.parse(line))
-    .map( s => {
-      println(s"Got msg: $s")
-      out ! s
-    })
-
+  def parseLine(line:String):String = {
+    Try(Json.parse(line))
+      .map( s => {
+        log.debug(s"Got msg: $s")
+        out ! s
+      })
+    Json.toJson(Map("type" -> "ack")).toString()
+  }
 }
 
 class TCPListener(host:String, port:Int, out:ActorRef) extends Actor with ActorLogging {
