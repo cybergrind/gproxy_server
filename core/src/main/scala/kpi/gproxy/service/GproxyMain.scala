@@ -8,9 +8,10 @@ class GproxyMain extends Actor with ActorLogging {
 
   val host = "192.168.88.33"
   val port = 16888
-  val listener = system.actorOf(Props(classOf[TCPListener], host, port, self))
+  val GpsProxy = system.actorOf(Props(classOf[GpsProxy]), "GpsProxy")
+  val listener = system.actorOf(Props(classOf[TCPListener], host, port, GpsProxy))
 
   def receive = {
-    case msg => log.info(s"Got message: $msg")
+    case msg => log.info(s"MAIN: Got message: $msg")
   }
 }

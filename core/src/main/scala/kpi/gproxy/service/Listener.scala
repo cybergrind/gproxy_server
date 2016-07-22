@@ -7,19 +7,25 @@ import scala.util.Try
 
 import akka.actor.{ActorRef, Props}
 import akka.io.{IO, Tcp}
-import play.api.libs.json.Json
+import play.api.libs.json._
+import kpi.grpoxy.{ RpcMessage, Update }
 
 
-class LineReceiver (out: ActorRef) extends Actor with ActorLogging {
+case class Out(msg: String)
+
+class LineReceiver (out: ActorRef, sock: ActorRef) extends Actor with ActorLogging {
   import Tcp._
 
   def receive = {
     case Received(data) => {
       val resp = parseLine(data.utf8String)
       log.debug(s"Send string: $resp")
-      sender() ! Write(ByteString(resp))
+      sock ! Write(ByteString(s"$resp\n"))
     }
-
+    case Out(msg) => {
+      log.debug(s"Out string: $msg")
+      sock ! Write(ByteString(s"$msg\n"))
+    }
     case PeerClosed => context stop self
     case ErrorClosed(cause) => context stop self
   }
@@ -28,9 +34,12 @@ class LineReceiver (out: ActorRef) extends Actor with ActorLogging {
     Try(Json.parse(line))
       .map( s => {
         log.debug(s"Got msg: $s")
-        out ! s
-      })
-    Json.toJson(Map("type" -> "ack")).toString()
+        val RpcMessage: JsResult[RpcMessage] = s.validate[RpcMessage]
+        RpcMessage match {
+          case s: JsSuccess[RpcMessage] => out ! s.get
+          case e: JsError => log.warning(s"Cannot parse: $s")
+        }})
+    Json.toJson(Map("msgType" -> "ack")).toString()
   }
 }
 
@@ -44,8 +53,8 @@ class TCPListener(host:String, port:Int, out:ActorRef) extends Actor with ActorL
   def receive = {
     case bound@Bound(localAddress) => out ! "ready"
     case connected@Connected(remote, local) =>
-      val handler = context.actorOf(Props(classOf[LineReceiver], out))
       val conn = sender()
+      val handler = context.actorOf(Props(classOf[LineReceiver], out, conn))
       conn ! Register(handler)
     case CommandFailed(msg: Bind) =>
       log.warning(s"Bind failed: $msg")

@@ -8,5 +8,5 @@ object Boot extends App {
   println("Boot")
 
   implicit val system = ActorSystem("gproxy")
-  val gproxy = system.actorOf(Props(classOf[GproxyMain]))
+  val gproxy = system.actorOf(Props(classOf[GproxyMain]), "GproxyMain")
 }
