@@ -7,7 +7,10 @@ import scala.util.Try
 
 import akka.actor.{ActorRef, Props}
 import akka.io.{IO, Tcp}
-import play.api.libs.json._
+
+import spray.json._
+import fommil.sjs.FamilyFormats._
+
 import kpi.grpoxy.{ RpcMessage, Update }
 
 
@@ -32,15 +35,11 @@ class LineReceiver (out: ActorRef, sock: ActorRef) extends Actor with ActorLoggi
 
   def parseLine(line:String):String = {
     line.split("\n").foreach( part => {
-      Try(Json.parse(part))
-        .map( s => {
-          log.debug(s"Got msg: $s")
-          val RpcMessage: JsResult[RpcMessage] = s.validate[RpcMessage]
-          RpcMessage match {
-            case s: JsSuccess[RpcMessage] => out ! s.get
-            case e: JsError => log.warning(s"Cannot parse: $s")
-          }})})
-    Json.toJson(Map("msgType" -> "ack")).toString()
+      val j = part.parseJson
+      val msg = j.convertTo[RpcMessage]
+      out ! msg
+    })
+    RpcMessage("ack", None).toJson.compactPrint
   }
 }
 

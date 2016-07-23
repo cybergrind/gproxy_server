@@ -1,7 +1,8 @@
 package kpi.gproxy.service
 
 import akka.actor.{ Actor, ActorLogging }
-import play.api.libs.json.Json
+import spray.json._
+import fommil.sjs.FamilyFormats._
 
 import kpi.grpoxy.{ RpcMessage, Update }
 
@@ -17,7 +18,8 @@ class GpsProxy extends Actor with ActorLogging {
         lng = loc.lng + 0.001)
 
       val m = RpcMessage("targetUpdate", Some(target))
-      sender() ! Out(Json.toJson(m).toString())
+      log.debug(s"Send resp: ${m.toJson.compactPrint}")
+      sender() ! Out(m.toJson.compactPrint)
     }
     case msg => log.info(s"Got message: $msg")
   }

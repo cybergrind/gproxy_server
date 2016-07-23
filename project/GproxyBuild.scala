@@ -19,7 +19,8 @@ object GproxyBuild extends Build {
       "-Ywarn-dead-code",
       "-Ywarn-numeric-widen",
       "-Xfuture",
-      "-Xlint"
+      "-Xlint",
+      "-Ylog-classpath"
       // ,"-Ymacro-debug-lite"
     ),
     resolvers += Resolver.sonatypeRepo("snapshots"),
@@ -27,22 +28,24 @@ object GproxyBuild extends Build {
     scalaVersion := "2.11.8"
   )
 
-  val akkaV = "2.4.4"
+  val akkaV = "2.4.8"
   val specsV = "3.7.2"
   val sprayV = "1.3.3"
   val baseDeps = Seq(
     "com.typesafe.akka" %% "akka-actor" % akkaV,
-    "com.chuusai" %% "shapeless" % "2.3.0",
-    "org.scala-lang" % "scala-reflect" % "2.11.8",
-    "org.scalaz" %% "scalaz-core" % "7.2.2",
+    //"com.chuusai" %% "shapeless" % "2.3.0",
+    //"org.scala-lang" % "scala-reflect" % "2.11.8",
+    //"org.scalaz" %% "scalaz-core" % "7.2.2",
     "com.typesafe" % "config" % "1.3.0",
     "org.slf4j" % "slf4j-log4j12" % "1.7.21",
     "io.spray" %% "spray-can" % sprayV,
     "io.spray" %% "spray-routing-shapeless2" % sprayV,
     "io.spray" %% "spray-httpx" % sprayV,
-    "com.typesafe.play" %% "play-json" % "2.5.1",
-    "org.java-websocket" % "Java-WebSocket" % "1.3.0",
-    "com.typesafe.akka" %% "akka-stream-experimental" % "2.0.4"
+    "io.spray" %% "spray-json" % "1.3.2",
+    //"com.typesafe.play" %% "play-json" % "2.5.1",
+    //"org.java-websocket" % "Java-WebSocket" % "1.3.0",
+    "com.github.fommil" %% "spray-json-shapeless" % "1.2.0"
+    //"com.typesafe.akka" %% "akka-stream-experimental" % "2.0.4"
   )
 
   val testDeps = Seq(
