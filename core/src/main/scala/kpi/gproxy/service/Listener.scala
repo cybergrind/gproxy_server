@@ -31,14 +31,15 @@ class LineReceiver (out: ActorRef, sock: ActorRef) extends Actor with ActorLoggi
   }
 
   def parseLine(line:String):String = {
-    Try(Json.parse(line))
-      .map( s => {
-        log.debug(s"Got msg: $s")
-        val RpcMessage: JsResult[RpcMessage] = s.validate[RpcMessage]
-        RpcMessage match {
-          case s: JsSuccess[RpcMessage] => out ! s.get
-          case e: JsError => log.warning(s"Cannot parse: $s")
-        }})
+    line.split("\n").foreach( part => {
+      Try(Json.parse(part))
+        .map( s => {
+          log.debug(s"Got msg: $s")
+          val RpcMessage: JsResult[RpcMessage] = s.validate[RpcMessage]
+          RpcMessage match {
+            case s: JsSuccess[RpcMessage] => out ! s.get
+            case e: JsError => log.warning(s"Cannot parse: $s")
+          }})})
     Json.toJson(Map("msgType" -> "ack")).toString()
   }
 }
