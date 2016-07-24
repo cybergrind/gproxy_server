@@ -1,4 +1,4 @@
-package kpi.grpoxy
+package kpi.gproxy
 
 
 case class Update(lat: Double, lng: Double, alt: Double,

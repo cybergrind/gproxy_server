@@ -11,7 +11,7 @@ import akka.io.{IO, Tcp}
 import spray.json._
 import fommil.sjs.FamilyFormats._
 
-import kpi.grpoxy.{ RpcMessage, Update }
+import kpi.gproxy.{ RpcMessage, Update }
 
 
 case class Out(msg: String)

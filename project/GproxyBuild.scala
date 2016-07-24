@@ -19,8 +19,7 @@ object GproxyBuild extends Build {
       "-Ywarn-dead-code",
       "-Ywarn-numeric-widen",
       "-Xfuture",
-      "-Xlint",
-      "-Ylog-classpath"
+      "-Xlint"
       // ,"-Ymacro-debug-lite"
     ),
     resolvers += Resolver.sonatypeRepo("snapshots"),
