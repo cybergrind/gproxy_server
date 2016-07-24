@@ -1,6 +1,9 @@
 import sbt.Keys._
 import sbt._
 import sbtassembly.AssemblyPlugin.autoImport._
+import org.scalajs.sbtplugin.ScalaJSPlugin
+import ScalaJSPlugin.autoImport._
+
 
 object GproxyBuild extends Build {
 
@@ -56,9 +59,13 @@ object GproxyBuild extends Build {
 
   val commonSettings = baseSettings ++ Seq(
     organization := "kpi",
-    version := "0.0.1",
+    version := "0.2.0",
     licenses +=("MIT", url("http://opensource.org/licenses/MIT")),
     libraryDependencies ++= baseDeps
+  )
+
+  val js = Seq(
+    scalaJSUseRhino in Global := false
   )
 
   val mainSettings = commonSettings ++ Seq(
@@ -76,9 +83,25 @@ object GproxyBuild extends Build {
   }
 
 
+  lazy val front = makeProject("front").
+    enablePlugins(ScalaJSPlugin).
+    settings(
+      js
+    )
+
   lazy val core = makeProject("core")
+
 
   lazy val main = makeProject("main", Some("."), mainSettings)
     .dependsOn(core)
     .aggregate(core)
+    .settings(
+    resources in Compile ++= Seq(
+      (fastOptJS in Compile in front).value.data
+    ),
+      unmanagedResourceDirectories in Compile += {
+        println(baseDirectory( _ / "front" / "src" / "main" / "resources").value)
+        baseDirectory( _ / "front" / "src" / "main" / "resources").value
+      }
+    )
 }

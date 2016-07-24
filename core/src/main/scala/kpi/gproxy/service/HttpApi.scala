@@ -14,12 +14,18 @@ trait HttpBase extends HttpService {
         handleQuery(query)
         complete(s"Ok with: $query")
       }}
-    } ~ 
+    } ~
     (path("force") & get) {
       parameter('f) { query =>
         handleTeleport(query)
         complete(s"Teleport: $query")
         }
+    } ~
+    (pathPrefix("bundle") & get) {
+      getFromResourceDirectory("")
+    } ~
+    (pathPrefix("dev") & get) {
+      getFromDirectory("target/scala-2.11/classes/")
     }
   }
 
