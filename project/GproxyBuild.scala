@@ -103,12 +103,15 @@ object GproxyBuild extends Build {
         println(s"START THIS")
         Process("npm"::"run"::"prod"::Nil, baseDirectory.value) !
 
+        //Process("npm"::"run"::"testBuild"::Nil, baseDirectory.value) !
+
         val targetDir = baseDirectory.value / "target" / "scala-2.11" / "classes"
         val (js, other) = mappings partition (_._2.endsWith(".js"))
         val bundleFile = targetDir / "bundle.js"
         val bundleMappings = Seq(bundleFile) pair relativeTo(targetDir)
         bundleMappings ++ other
       },
+      //webpack <<= webpack dependsOn(
       pipelineStages := Seq(webpack),
       js,
       // skip in packageJSDependencies := false,

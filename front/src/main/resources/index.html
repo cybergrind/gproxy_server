@@ -2,11 +2,14 @@
     <head>
         <script type="text/javascript" src="./front-jsdeps.js"></script>
         <script type="text/javascript" src="./front-fastopt.js"></script>
-        <script>
-         kpi.gproxy.front.MainApp().main()
+         <script>
+         document.addEventListener("DOMContentLoaded",  function(){
+             kpi.gproxy.front.MainApp().main()
+         })
         </script>
     </head>
     <body>
         HELLO
+        <section id='reactRoot'></section>
     </body>
 </html>
