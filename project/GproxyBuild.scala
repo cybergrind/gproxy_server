@@ -1,8 +1,13 @@
 import sbt.Keys._
 import sbt._
 import sbtassembly.AssemblyPlugin.autoImport._
+
 import org.scalajs.sbtplugin.ScalaJSPlugin
 import ScalaJSPlugin.autoImport._
+
+import com.typesafe.sbt.web.{SbtWeb, PathMapping, pipeline}
+import pipeline.Pipeline
+import SbtWeb.autoImport._
 
 
 object GproxyBuild extends Build {
@@ -65,7 +70,11 @@ object GproxyBuild extends Build {
   )
 
   val js = Seq(
-    scalaJSUseRhino in Global := false
+    scalaJSUseRhino in Global := false,
+    libraryDependencies ++= Seq(
+      "org.scala-js" %%% "scalajs-dom" % "0.9.1",
+      "com.github.japgolly.scalajs-react" %%% "core" % "0.11.1"
+    )
   )
 
   val mainSettings = commonSettings ++ Seq(
@@ -83,10 +92,27 @@ object GproxyBuild extends Build {
   }
 
 
+  val webpack = taskKey[Pipeline.Stage]("webpack")
+
+
   lazy val front = makeProject("front").
-    enablePlugins(ScalaJSPlugin).
+    enablePlugins(ScalaJSPlugin, SbtWeb).
     settings(
-      js
+      WebKeys.nodeModuleDirectory in Assets := (baseDirectory.value / "node_modules"),
+      webpack := { mappings: Seq[PathMapping] =>
+        println(s"START THIS")
+        Process("npm"::"run"::"prod"::Nil, baseDirectory.value) !
+
+        val targetDir = baseDirectory.value / "target" / "scala-2.11" / "classes"
+        val (js, other) = mappings partition (_._2.endsWith(".js"))
+        val bundleFile = targetDir / "bundle.js"
+        val bundleMappings = Seq(bundleFile) pair relativeTo(targetDir)
+        bundleMappings ++ other
+      },
+      pipelineStages := Seq(webpack),
+      js,
+      // skip in packageJSDependencies := false,
+      jsDependencies += ProvidedJS / "bundle.js" commonJSName "Bundle"
     )
 
   lazy val core = makeProject("core")
@@ -96,12 +122,13 @@ object GproxyBuild extends Build {
     .dependsOn(core)
     .aggregate(core)
     .settings(
-    resources in Compile ++= Seq(
-      (fastOptJS in Compile in front).value.data
-    ),
-      unmanagedResourceDirectories in Compile += {
-        println(baseDirectory( _ / "front" / "src" / "main" / "resources").value)
+    (test in Test) <<= (test in Test).dependsOn(WebKeys.pipeline in Assets in front),
+      resources in Compile ++= Seq(
+        (fastOptJS in Compile in front).value.data,
+        baseDirectory( _ / "front" / "target" / "scala-2.11" / "front-jsdeps.js").value
+      ),
+      unmanagedResourceDirectories in Compile ++= Seq(
         baseDirectory( _ / "front" / "src" / "main" / "resources").value
-      }
+      )
     )
 }
