@@ -5,11 +5,11 @@ function testFun() {
     console.log('Test fun called');
 }
 
-// global.testFun = testFun;
-
-global.Bundle = {
+const Bundle = {
     React,
     testFun,
 };
+
+module.exports = Bundle;
 
 console.log('Main!');

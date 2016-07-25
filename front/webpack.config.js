@@ -56,14 +56,16 @@ module.exports = {
     output: {
         path: path.join(__dirname, 'src/main/resources/'),
         filename: 'bundle.js',
-        publicPath: ''
+        publicPath: '',
+        library: 'Bundle',
+        libraryTarget: 'umd',
     },
     plugins,
     module: {
         loaders: [{
             test: /\.js$/,
             loaders: loaders,
-            include: path.join(__dirname, 'src')
+            include: path.join(__dirname, 'src'),
         }],
     },
 };

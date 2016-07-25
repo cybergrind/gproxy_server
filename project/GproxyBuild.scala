@@ -112,7 +112,7 @@ object GproxyBuild extends Build {
       pipelineStages := Seq(webpack),
       js,
       // skip in packageJSDependencies := false,
-      jsDependencies += ProvidedJS / "bundle.js" commonJSName "Bundle"
+      jsDependencies += ProvidedJS / "bundle.js"
     )
 
   lazy val core = makeProject("core")
