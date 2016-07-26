@@ -1,5 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+// TODO: separate prod / test imports
+import '../../../../target/scala-2.11/front-fastopt.js';
 
 
 function testFun() {
@@ -10,8 +12,6 @@ function log(what) {
     console.log(what);
 }
 
-global.React = React
-global.ReactDOM = ReactDOM
 
 const Bundle = {
     React,
@@ -20,6 +20,16 @@ const Bundle = {
     log,
 };
 
-module.exports = Bundle;
+global.React = React;
+global.ReactDOM = ReactDOM;
+global.Bundle = Bundle;
+
+export default Bundle;
 
 console.log('Main!');
+
+/* global kpi */
+/* eslint new-cap:"off" */
+document.addEventListener('DOMContentLoaded', () => {
+    kpi.gproxy.front.MainApp().main();
+});

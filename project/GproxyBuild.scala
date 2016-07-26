@@ -111,11 +111,11 @@ object GproxyBuild extends Build {
         val bundleMappings = Seq(bundleFile) pair relativeTo(targetDir)
         bundleMappings ++ other
       },
-      //webpack <<= webpack dependsOn(
+      webpack <<= webpack dependsOn(fastOptJS in Compile),
       pipelineStages := Seq(webpack),
-      js,
+      js
       // skip in packageJSDependencies := false,
-      jsDependencies += ProvidedJS / "bundle.js"
+      // jsDependencies += ProvidedJS / "bundle.js"
     )
 
   lazy val core = makeProject("core")
@@ -125,11 +125,7 @@ object GproxyBuild extends Build {
     .dependsOn(core)
     .aggregate(core)
     .settings(
-    (test in Test) <<= (test in Test).dependsOn(WebKeys.pipeline in Assets in front),
-      resources in Compile ++= Seq(
-        (fastOptJS in Compile in front).value.data,
-        baseDirectory( _ / "front" / "target" / "scala-2.11" / "front-jsdeps.js").value
-      ),
+    (compile in Compile) <<= (compile in Compile).dependsOn(WebKeys.pipeline in Assets in front),
       unmanagedResourceDirectories in Compile ++= Seq(
         baseDirectory( _ / "front" / "src" / "main" / "resources").value
       )

@@ -57,8 +57,6 @@ module.exports = {
         path: path.join(__dirname, 'src/main/resources/'),
         filename: 'bundle.js',
         publicPath: '',
-        library: 'Bundle',
-        libraryTarget: 'umd',
     },
     plugins,
     module: {

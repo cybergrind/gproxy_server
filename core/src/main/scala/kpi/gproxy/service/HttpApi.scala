@@ -25,7 +25,7 @@ trait HttpBase extends HttpService {
       getFromResourceDirectory("")
     } ~
     (pathPrefix("dev") & get) {
-      getFromDirectory("./target/scala-2.11/classes/")
+      getFromDirectory("./front/src/main/resources/")
     }
   }
 
